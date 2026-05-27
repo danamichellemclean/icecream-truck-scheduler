@@ -1,0 +1,59 @@
+/* ── CSS custom property defaults (overridden by branding.js at runtime) ── */
+:root {
+  --color-primary:          #F5B700;
+  --color-primary-light:    #FFE066;
+  --color-primary-dark:     #C68A00;
+  --color-secondary:        #5BB8F5;
+  --color-secondary-light:  #C8E8FF;
+  --color-accent:           #FF8C42;
+  --color-background:       #FFFDF5;
+  --color-surface:          #FFFFFF;
+  --color-surface-alt:      #FFF8E7;
+  --color-text:             #2C1810;
+  --color-text-secondary:   #7A6155;
+  --color-border:           #EDE0C8;
+  --color-danger:           #D94F3D;
+  --color-success:          #3D9E6B;
+}
+
+/* ── Reset ───────────────────────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue',
+    Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 {
+  line-height: 1.2;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+button, input, select, textarea {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+/* date/time inputs need explicit height on iOS */
+input[type="date"],
+input[type="time"] {
+  min-height: 42px;
+}

@@ -1,0 +1,35 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-background);
+}
+
+/* Fixed background image overlay — rendered below all app chrome */
+.app-bg-overlay {
+  position: fixed;
+  inset: 0;
+  background-image: var(--bg-image-url, none);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.09;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app-main {
+  flex: 1;
+  position: relative;
+  z-index: 1;
+  /* Mobile: leave room for the fixed bottom nav (5 tabs ≈ 54px + safe area) */
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+  overflow-y: auto;
+}
+
+@media (min-width: 700px) {
+  /* Desktop: nav is static (inline), no bottom offset needed */
+  .app-main {
+    padding-bottom: 0;
+  }
+}

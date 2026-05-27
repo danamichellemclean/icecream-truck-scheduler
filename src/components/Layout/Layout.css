@@ -1,0 +1,147 @@
+/* ── Header ─────────────────────────────────────────────────────────────── */
+.app-header {
+  background: var(--color-primary);
+  color: var(--color-text);
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.header-emoji {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.header-logo {
+  height: 44px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.header-text { min-width: 0; }
+
+.header-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
+}
+
+.header-tagline {
+  font-size: 0.75rem;
+  margin: 0;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Bottom Nav (mobile) ─────────────────────────────────────────────────── */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--color-surface);
+  border-top: 1px solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 100;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.nav-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 7px 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  transition: color 0.15s;
+  min-height: 54px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.nav-tab:active { opacity: 0.7; }
+
+.nav-tab--active {
+  color: var(--color-primary-dark);
+}
+
+.nav-tab--active .nav-label {
+  font-weight: 700;
+}
+
+.nav-icon {
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.nav-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* ── Desktop nav (inline bar below header) ───────────────────────────────── */
+@media (min-width: 700px) {
+  .app-header {
+    padding: 14px 24px;
+  }
+
+  .header-title { font-size: 1.35rem; }
+  .header-tagline { font-size: 0.8rem; }
+
+  .bottom-nav {
+    position: static;
+    border-top: none;
+    border-bottom: 1px solid var(--color-border);
+    box-shadow: none;
+    padding: 0 16px;
+    background: var(--color-surface-alt);
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .nav-tab {
+    flex: 0 1 120px;
+    flex-direction: row;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    min-height: unset;
+  }
+
+  .nav-tab--active {
+    background: var(--color-primary-light);
+  }
+
+  .nav-label {
+    font-size: 0.82rem;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .nav-icon { font-size: 1rem; }
+}

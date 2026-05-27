@@ -1,0 +1,208 @@
+.calendar-wrap {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ── Nav ─────────────────────────────────────────────────────────────────── */
+.calendar-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 16px 10px;
+  gap: 12px;
+}
+
+.calendar-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.calendar-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.cal-nav-btn {
+  background: var(--color-surface-alt);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  width: 38px;
+  height: 38px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cal-nav-btn:hover {
+  background: var(--color-primary-light);
+}
+
+.cal-today-btn {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-size: 0.72rem;
+  font-family: inherit;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.cal-today-btn:hover {
+  background: var(--color-primary-light);
+  color: var(--color-text);
+}
+
+/* ── Grid ────────────────────────────────────────────────────────────────── */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 1px;
+  background: var(--color-border);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  overflow: hidden;
+  margin: 0 8px 8px;
+}
+
+.cal-day-header {
+  background: var(--color-surface-alt);
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 8px 4px;
+}
+
+.cal-cell {
+  background: var(--color-surface);
+  padding: 6px 4px 6px;
+  min-height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  text-align: left;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cal-cell:hover {
+  background: var(--color-surface-alt);
+}
+
+.cal-cell--empty {
+  background: var(--color-background);
+  cursor: default;
+  pointer-events: none;
+}
+
+.cal-cell--today .cal-day-num {
+  background: var(--color-primary);
+  color: var(--color-text);
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.cal-day-num {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-text);
+  padding: 2px 4px;
+  margin-bottom: 2px;
+  min-width: 26px;
+  text-align: center;
+}
+
+.cal-events {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.cal-event-chip {
+  display: block;
+  width: 100%;
+  background: var(--color-secondary-light);
+  color: var(--color-text);
+  border: none;
+  border-radius: 4px;
+  padding: 2px 5px;
+  font-size: 0.65rem;
+  font-family: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cal-event-chip:hover {
+  background: var(--color-secondary);
+}
+
+.cal-more {
+  font-size: 0.62rem;
+  color: var(--color-text-secondary);
+  padding-left: 5px;
+}
+
+/* ── Mobile: tighter cells ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .cal-cell {
+    min-height: 56px;
+    padding: 4px 2px;
+  }
+
+  .cal-day-header {
+    font-size: 0.6rem;
+    padding: 6px 2px;
+  }
+
+  .cal-day-num {
+    font-size: 0.75rem;
+  }
+
+  .calendar-grid {
+    margin: 0 0 8px;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+}
+
+/* ── Desktop: taller cells ───────────────────────────────────────────────── */
+@media (min-width: 640px) {
+  .cal-cell {
+    min-height: 90px;
+  }
+
+  .cal-event-chip {
+    font-size: 0.72rem;
+    padding: 3px 6px;
+  }
+}

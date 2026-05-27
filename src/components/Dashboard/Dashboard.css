@@ -1,0 +1,156 @@
+.dashboard {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 16px 12px 24px;
+}
+
+/* ── Summary strip ───────────────────────────────────────────────────────── */
+.dashboard-summary {
+  display: flex;
+  align-items: center;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+  gap: 0;
+}
+
+.summary-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.summary-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.summary-value--green {
+  color: var(--color-success);
+}
+
+.summary-label {
+  font-size: 0.68rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.summary-divider {
+  width: 1px;
+  height: 36px;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+/* ── Sections ────────────────────────────────────────────────────────────── */
+.dashboard-section {
+  margin-bottom: 28px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 12px;
+}
+
+.section-title--muted {
+  color: var(--color-text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+}
+
+.section-header .section-title {
+  margin-bottom: 0;
+}
+
+/* ── Add button ──────────────────────────────────────────────────────────── */
+.btn-add {
+  background: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.btn-add:hover {
+  background: var(--color-primary-dark);
+  color: white;
+}
+
+/* ── Event list ──────────────────────────────────────────────────────────── */
+.event-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ── Empty state ─────────────────────────────────────────────────────────── */
+.dashboard-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  text-align: center;
+  background: var(--color-surface);
+  border: 2px dashed var(--color-border);
+  border-radius: 16px;
+  color: var(--color-text-secondary);
+}
+
+.dashboard-empty-icon {
+  font-size: 2.5rem;
+}
+
+.dashboard-empty p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.btn-add-large {
+  background: var(--color-primary);
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--color-text);
+  margin-top: 4px;
+  transition: background 0.15s;
+}
+
+.btn-add-large:hover {
+  background: var(--color-primary-dark);
+  color: white;
+}
+
+@media (min-width: 640px) {
+  .dashboard {
+    padding: 20px 24px 32px;
+  }
+}

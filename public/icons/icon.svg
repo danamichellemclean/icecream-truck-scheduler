@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Background -->
+  <circle cx="256" cy="256" r="256" fill="#F5B700"/>
+  <!-- Ice cream scoop -->
+  <circle cx="256" cy="195" r="92" fill="#FFF9F0"/>
+  <circle cx="256" cy="195" r="92" fill="url(#scoop-grad)"/>
+  <!-- Sprinkles -->
+  <rect x="228" y="155" width="14" height="6" rx="3" fill="#FF6B8A" transform="rotate(-30 235 158)"/>
+  <rect x="268" y="170" width="14" height="6" rx="3" fill="#5BB8F5" transform="rotate(20 275 173)"/>
+  <rect x="240" y="195" width="14" height="6" rx="3" fill="#A78BFA" transform="rotate(-15 247 198)"/>
+  <rect x="275" y="150" width="14" height="6" rx="3" fill="#3D9E6B" transform="rotate(40 282 153)"/>
+  <rect x="220" y="210" width="14" height="6" rx="3" fill="#FF8C42" transform="rotate(10 227 213)"/>
+  <!-- Drip -->
+  <path d="M300 255 Q310 290 305 310 Q300 325 290 320 Q280 315 285 300 Q290 285 300 255Z" fill="#FFF0D0"/>
+  <!-- Cone -->
+  <path d="M172 278 L256 450 L340 278 Q256 298 172 278Z" fill="#FF8C42"/>
+  <!-- Cone waffle lines -->
+  <line x1="214" y1="283" x2="256" y2="450" stroke="#C86800" stroke-width="3" opacity="0.5"/>
+  <line x1="298" y1="283" x2="256" y2="450" stroke="#C86800" stroke-width="3" opacity="0.5"/>
+  <line x1="185" y1="310" x2="327" y2="310" stroke="#C86800" stroke-width="3" opacity="0.5"/>
+  <line x1="196" y1="340" x2="316" y2="340" stroke="#C86800" stroke-width="3" opacity="0.5"/>
+  <line x1="210" y1="370" x2="302" y2="370" stroke="#C86800" stroke-width="3" opacity="0.5"/>
+  <!-- Cone top edge -->
+  <ellipse cx="256" cy="278" rx="84" ry="12" fill="#FFB566"/>
+  <defs>
+    <radialGradient id="scoop-grad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFF9F0"/>
+      <stop offset="100%" stop-color="#FFE4B5"/>
+    </radialGradient>
+  </defs>
+</svg>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full bleed background for maskable -->
+  <rect width="512" height="512" fill="#F5B700"/>
+  <!-- Ice cream scoop -->
+  <circle cx="256" cy="210" r="85" fill="#FFF9F0"/>
+  <circle cx="256" cy="210" r="85" fill="url(#m-grad)"/>
+  <!-- Sprinkles -->
+  <rect x="232" y="175" width="12" height="5" rx="2.5" fill="#FF6B8A" transform="rotate(-30 238 177)"/>
+  <rect x="265" y="188" width="12" height="5" rx="2.5" fill="#5BB8F5" transform="rotate(20 271 190)"/>
+  <rect x="244" y="210" width="12" height="5" rx="2.5" fill="#A78BFA" transform="rotate(-15 250 212)"/>
+  <rect x="272" y="170" width="12" height="5" rx="2.5" fill="#3D9E6B" transform="rotate(40 278 172)"/>
+  <!-- Cone -->
+  <path d="M180 285 L256 440 L332 285 Q256 302 180 285Z" fill="#FF8C42"/>
+  <line x1="218" y1="289" x2="256" y2="440" stroke="#C86800" stroke-width="2.5" opacity="0.5"/>
+  <line x1="294" y1="289" x2="256" y2="440" stroke="#C86800" stroke-width="2.5" opacity="0.5"/>
+  <line x1="192" y1="315" x2="320" y2="315" stroke="#C86800" stroke-width="2.5" opacity="0.5"/>
+  <line x1="204" y1="345" x2="308" y2="345" stroke="#C86800" stroke-width="2.5" opacity="0.5"/>
+  <ellipse cx="256" cy="285" rx="76" ry="11" fill="#FFB566"/>
+  <defs>
+    <radialGradient id="m-grad" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFF9F0"/>
+      <stop offset="100%" stop-color="#FFE4B5"/>
+    </radialGradient>
+  </defs>
+</svg>

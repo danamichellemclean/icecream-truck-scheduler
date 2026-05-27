@@ -1,0 +1,181 @@
+.settings-wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 12px 32px;
+}
+
+.settings-intro {
+  margin-bottom: 20px;
+}
+
+.settings-page-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--color-text);
+  margin: 0 0 4px;
+}
+
+.settings-page-sub {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Section card ─────────────────────────────────────────────────────────── */
+.settings-section {
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.settings-section-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 14px 16px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface-alt);
+}
+
+.settings-section-icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.settings-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+  flex: 1;
+}
+
+.settings-section-count {
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--color-border);
+  color: var(--color-text-secondary);
+  border-radius: 20px;
+  padding: 2px 8px;
+}
+
+/* ── List ─────────────────────────────────────────────────────────────────── */
+.settings-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.settings-list-empty {
+  padding: 14px 16px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.settings-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--color-border);
+  gap: 10px;
+  transition: background 0.1s;
+}
+
+.settings-list-item:last-child {
+  border-bottom: none;
+}
+
+.settings-list-item:hover {
+  background: var(--color-background);
+}
+
+.settings-item-label {
+  font-size: 0.9rem;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.settings-item-delete {
+  background: none;
+  border: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  font-size: 1rem;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.12s, color 0.12s;
+  line-height: 1;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-item-delete:hover {
+  background: var(--color-danger);
+  color: white;
+}
+
+/* ── Add row ─────────────────────────────────────────────────────────────── */
+.settings-add-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: var(--color-background);
+  border-top: 1px solid var(--color-border);
+}
+
+.settings-input {
+  flex: 1;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.settings-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+.settings-add-btn {
+  background: var(--color-primary);
+  border: none;
+  border-radius: 10px;
+  padding: 9px 18px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--color-text);
+  white-space: nowrap;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-add-btn:hover {
+  background: var(--color-primary-dark);
+  color: white;
+}
+
+.settings-add-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .settings-wrap {
+    padding: 20px 24px 40px;
+  }
+}

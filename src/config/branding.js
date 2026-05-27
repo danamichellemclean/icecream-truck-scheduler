@@ -43,7 +43,7 @@ const branding = {
   // Set to null to disable; operators can swap in their own URL here.
   backgroundImageUrl: "https://hosting.renderforestsites.com/33152010/1568876/media/9185a6e04ee88773fa979a19a9f845be.png",
 
-  employees: ["Alex", "Jamie", "Sam", "Taylor", "Morgan"],
+  employees: ["Brooke", "Danny", "Dani"],
 
   // ── PWA / manifest values ──────────────────────────────────────────────────
   // These must also be kept in sync with public/manifest.json manually

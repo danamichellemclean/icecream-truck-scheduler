@@ -3,21 +3,50 @@ import branding from '../config/branding';
 
 const KEY = 'ics_settings';
 
+function getBrandingSig() {
+  return JSON.stringify({
+    packages: branding.packages,
+    trucks: branding.trucks,
+    employees: branding.employees,
+  });
+}
+
+function isValidShape(obj) {
+  return obj && Array.isArray(obj.packages) && Array.isArray(obj.trucks) && Array.isArray(obj.employees);
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(KEY);
-    if (raw) return JSON.parse(raw);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // If the saved data matches the current branding signature, keep it.
+      if (isValidShape(parsed) && parsed._brandingSig === getBrandingSig()) {
+        return {
+          packages: [...parsed.packages],
+          trucks: [...parsed.trucks],
+          employees: [...parsed.employees],
+        };
+      }
+      // Otherwise fall through and reset to branding defaults.
+    }
   } catch { /* fall through */ }
-  // First run: seed from branding defaults
-  return {
+
+  // Seed from branding defaults and persist the new signature
+  const defaults = {
     packages: [...branding.packages],
     trucks: [...branding.trucks],
     employees: [...branding.employees],
   };
+  save(defaults);
+  return defaults;
 }
 
 function save(data) {
-  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { /* ignore */ }
+  try {
+    const toSave = { ...data, _brandingSig: getBrandingSig() };
+    localStorage.setItem(KEY, JSON.stringify(toSave));
+  } catch { /* ignore */ }
 }
 
 export default function useSettings() {

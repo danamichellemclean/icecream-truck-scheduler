@@ -50,7 +50,6 @@ function toDbEvent(event) {
 
 function toDbSettings(settings) {
   return {
-    id: 'default',
     value: settings,
   };
 }
@@ -83,10 +82,27 @@ export async function initializeSupabaseTables() {
 
     if (settings) {
       console.log('Migrating settings to Supabase...');
-      await supabase
+      // If a settings row already exists, update it; otherwise insert a new row.
+      const { data: existing, error: fetchErr } = await supabase
         .from('settings')
-        .upsert(toDbSettings(settings))
-        .select();
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchErr) throw fetchErr;
+
+      if (existing && existing.id) {
+        await supabase
+          .from('settings')
+          .update({ value: settings })
+          .eq('id', existing.id)
+          .select();
+      } else {
+        await supabase
+          .from('settings')
+          .insert(toDbSettings(settings))
+          .select();
+      }
     }
 
     console.log('Supabase migration complete');

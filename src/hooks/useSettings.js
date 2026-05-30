@@ -26,23 +26,18 @@ export default function useSettings() {
   const loadSettings = useCallback(async () => {
     try {
       setLoading(true);
+      // Read the first settings row; don't assume a specific id string (UUID PKs possible)
       const { data, error } = await supabase
         .from('settings')
-        .select('value')
-        .eq('id', 'default')
-        .single();
-      
+        .select('value, id')
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
       let loadedSettings;
-      if (error && error.code === 'PGRST116') {
-        loadedSettings = {
-          packages: [...branding.packages],
-          trucks: [...branding.trucks],
-          employees: [...branding.employees],
-        };
-        await saveSettingsToSupabase(loadedSettings);
-      } else if (error) {
+      if (error) {
         throw error;
-      } else if (data && isValidShape(data.value)) {
+      } else if (data && data.value && isValidShape(data.value)) {
         if (data.value._brandingSig === getBrandingSig()) {
           loadedSettings = {
             packages: [...data.value.packages],
@@ -58,6 +53,7 @@ export default function useSettings() {
           await saveSettingsToSupabase(loadedSettings);
         }
       } else {
+        // No settings row or invalid shape — create defaults and persist
         loadedSettings = {
           packages: [...branding.packages],
           trucks: [...branding.trucks],
@@ -65,7 +61,7 @@ export default function useSettings() {
         };
         await saveSettingsToSupabase(loadedSettings);
       }
-      
+
       setSettings(loadedSettings);
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -83,12 +79,29 @@ export default function useSettings() {
   const saveSettingsToSupabase = async (data) => {
     try {
       const toSave = { ...data, _brandingSig: getBrandingSig() };
-      const { error } = await supabase
+      // Find an existing settings row, if any
+      const { data: existing, error: fetchErr } = await supabase
         .from('settings')
-        .upsert({ id: 'default', value: toSave }, { onConflict: 'id' })
-        .select();
-      
-      if (error) throw error;
+        .select('id')
+        .limit(1)
+        .maybeSingle();
+
+      if (fetchErr) throw fetchErr;
+
+      if (existing && existing.id) {
+        const { error } = await supabase
+          .from('settings')
+          .update({ value: toSave })
+          .eq('id', existing.id)
+          .select();
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('settings')
+          .insert({ value: toSave })
+          .select();
+        if (error) throw error;
+      }
     } catch (error) {
       console.error('Error saving settings:', error);
     }

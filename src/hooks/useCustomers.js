@@ -5,6 +5,30 @@ function generateId() {
   return `cust-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
+function fromDbCustomer(row) {
+  return {
+    id: row.id,
+    name: row.full_name || '',
+    phone: row.phone || '',
+    email: row.email || '',
+    address: row.address || '',
+    notes: row.notes || '',
+    createdAt: row.created_at || null,
+  };
+}
+
+function toDbCustomer(data) {
+  return {
+    id: data.id,
+    full_name: data.name || null,
+    phone: data.phone || null,
+    email: data.email || null,
+    address: data.address || null,
+    notes: data.notes || null,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+}
+
 export default function useCustomers() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,10 +44,10 @@ export default function useCustomers() {
       const { data, error } = await supabase
         .from('customers')
         .select('*')
-        .order('createdAt', { ascending: false });
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
-      setCustomers(data || []);
+      setCustomers((data || []).map(fromDbCustomer));
     } catch (error) {
       console.error('Error loading customers:', error);
       setCustomers([]);
@@ -35,13 +59,20 @@ export default function useCustomers() {
   const addCustomer = useCallback(async (data) => {
     try {
       const customer = { ...data, id: generateId(), createdAt: new Date().toISOString() };
-      const { error } = await supabase
+      const dbCustomer = toDbCustomer(customer);
+      const { data: result, error } = await supabase
         .from('customers')
-        .insert([customer]);
+        .insert([dbCustomer])
+        .select();
       
-      if (error) throw error;
-      setCustomers((prev) => [customer, ...prev]);
-      return customer;
+      if (error) {
+        console.error('useCustomers.addCustomer Supabase error:', error);
+        throw error;
+      }
+
+      const savedCustomer = fromDbCustomer(result?.[0] || dbCustomer);
+      setCustomers((prev) => [savedCustomer, ...prev]);
+      return savedCustomer;
     } catch (error) {
       console.error('Error adding customer:', error);
       throw error;
@@ -50,13 +81,21 @@ export default function useCustomers() {
 
   const updateCustomer = useCallback(async (data) => {
     try {
-      const { error } = await supabase
+      const dbCustomer = toDbCustomer(data);
+      const { id, ...payload } = dbCustomer;
+      delete payload.created_at;
+      const { data: result, error } = await supabase
         .from('customers')
-        .update(data)
-        .eq('id', data.id);
+        .update(payload)
+        .eq('id', id)
+        .select();
       
-      if (error) throw error;
-      setCustomers((prev) => prev.map((c) => (c.id === data.id ? { ...c, ...data } : c)));
+      if (error) {
+        console.error('useCustomers.updateCustomer Supabase error:', error);
+        throw error;
+      }
+      const updatedCustomer = fromDbCustomer(result?.[0] || { id, ...payload, created_at: data.createdAt });
+      setCustomers((prev) => prev.map((c) => (c.id === id ? updatedCustomer : c)));
     } catch (error) {
       console.error('Error updating customer:', error);
       throw error;

@@ -5,11 +5,62 @@ function generateId() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function safeParse(value) {
+  if (!value) return [];
+  if (typeof value === 'string') {
+    try { return JSON.parse(value); } catch { return []; }
+  }
+  return Array.isArray(value) ? value : [];
+}
+
+function toDbEvent(data) {
+  const employeesValue = data.employees;
+  const employeesArray = typeof employeesValue === 'string'
+    ? (() => {
+        try { return JSON.parse(employeesValue); } catch { return []; }
+      })()
+    : Array.isArray(employeesValue)
+      ? employeesValue
+      : [];
+
+  return {
+    id: data.id,
+    event_date: data.eventDate || data.date || null,
+    start_time: data.startTime || null,
+    end_time: data.endTime || null,
+    setup_time: data.setupTime || null,
+    contact_name: data.contactName || null,
+    package: data.package || null,
+    truck: data.truck || null,
+    total_sales: data.totalSales != null ? parseFloat(data.totalSales) : null,
+    employees: JSON.stringify(employeesArray),
+    notes: data.notes || null,
+    created_at: data.createdAt || new Date().toISOString(),
+  };
+}
+
+function fromDbEvent(row) {
+  return {
+    id: row.id,
+    eventDate: row.event_date || '',
+    date: row.event_date || '',
+    startTime: row.start_time || '',
+    endTime: row.end_time || '',
+    setupTime: row.setup_time || '',
+    contactName: row.contact_name || '',
+    package: row.package || '',
+    truck: row.truck || '',
+    totalSales: row.total_sales != null ? String(row.total_sales) : '',
+    employees: safeParse(row.employees),
+    notes: row.notes || '',
+    createdAt: row.created_at || null,
+  };
+}
+
 export default function useEvents() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Load events from Supabase on mount
   useEffect(() => {
     loadEvents();
   }, []);
@@ -20,10 +71,10 @@ export default function useEvents() {
       const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('date', { ascending: true });
+        .order('event_date', { ascending: true });
       
       if (error) throw error;
-      setEvents(data || []);
+      setEvents((data || []).map(fromDbEvent));
     } catch (error) {
       console.error('Error loading events:', error);
       setEvents([]);
@@ -34,46 +85,46 @@ export default function useEvents() {
 
   const addEvent = useCallback(async (data) => {
     try {
-      console.log('useEvents.addEvent: Creating event:', data);
       const event = { ...data, id: generateId(), createdAt: new Date().toISOString() };
-      console.log('useEvents.addEvent: Event object to insert:', event);
+      const dbEvent = toDbEvent(event);
       const { data: result, error } = await supabase
         .from('events')
-        .insert([event])
+        .insert([dbEvent])
         .select();
       
-      console.log('useEvents.addEvent: Supabase response - data:', result, 'error:', error);
       if (error) {
         console.error('useEvents.addEvent: Supabase error:', error);
         throw new Error(error.message || 'Failed to insert event into database');
       }
-      console.log('useEvents.addEvent: Successfully inserted event');
-      setEvents((prev) => [...prev, event]);
-      return event;
+
+      const savedEvent = fromDbEvent(result?.[0] || dbEvent);
+      setEvents((prev) => [...prev, savedEvent]);
+      return savedEvent;
     } catch (error) {
-      console.error('useEvents.addEvent: Catch block error:', error);
+      console.error('Error adding event:', error);
       throw error;
     }
   }, []);
 
   const updateEvent = useCallback(async (data) => {
     try {
-      console.log('useEvents.updateEvent: Updating event:', data.id);
+      const dbEvent = toDbEvent(data);
+      const { id, ...payload } = dbEvent;
+      delete payload.created_at;
       const { data: result, error } = await supabase
         .from('events')
-        .update(data)
-        .eq('id', data.id)
+        .update(payload)
+        .eq('id', id)
         .select();
       
-      console.log('useEvents.updateEvent: Supabase response - data:', result, 'error:', error);
       if (error) {
         console.error('useEvents.updateEvent: Supabase error:', error);
         throw new Error(error.message || 'Failed to update event in database');
       }
-      console.log('useEvents.updateEvent: Successfully updated event');
-      setEvents((prev) => prev.map((e) => (e.id === data.id ? { ...e, ...data } : e)));
+      const updatedEvent = fromDbEvent(result?.[0] || { id, ...payload, created_at: data.createdAt });
+      setEvents((prev) => prev.map((e) => (e.id === id ? updatedEvent : e)));
     } catch (error) {
-      console.error('useEvents.updateEvent: Catch block error:', error);
+      console.error('Error updating event:', error);
       throw error;
     }
   }, []);

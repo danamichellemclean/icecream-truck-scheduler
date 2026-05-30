@@ -28,13 +28,12 @@ export default function useSettings() {
       setLoading(true);
       const { data, error } = await supabase
         .from('settings')
-        .select('data')
+        .select('value')
         .eq('id', 'default')
         .single();
       
       let loadedSettings;
       if (error && error.code === 'PGRST116') {
-        // No settings found, create defaults
         loadedSettings = {
           packages: [...branding.packages],
           trucks: [...branding.trucks],
@@ -43,16 +42,14 @@ export default function useSettings() {
         await saveSettingsToSupabase(loadedSettings);
       } else if (error) {
         throw error;
-      } else if (data && isValidShape(data.data)) {
-        // Check if branding signature matches
-        if (data.data._brandingSig === getBrandingSig()) {
+      } else if (data && isValidShape(data.value)) {
+        if (data.value._brandingSig === getBrandingSig()) {
           loadedSettings = {
-            packages: [...data.data.packages],
-            trucks: [...data.data.trucks],
-            employees: [...data.data.employees],
+            packages: [...data.value.packages],
+            trucks: [...data.value.trucks],
+            employees: [...data.value.employees],
           };
         } else {
-          // Reset to branding defaults
           loadedSettings = {
             packages: [...branding.packages],
             trucks: [...branding.trucks],
@@ -61,7 +58,6 @@ export default function useSettings() {
           await saveSettingsToSupabase(loadedSettings);
         }
       } else {
-        // Invalid data, reset to defaults
         loadedSettings = {
           packages: [...branding.packages],
           trucks: [...branding.trucks],
@@ -73,7 +69,6 @@ export default function useSettings() {
       setSettings(loadedSettings);
     } catch (error) {
       console.error('Error loading settings:', error);
-      // Fall back to branding defaults
       const defaults = {
         packages: [...branding.packages],
         trucks: [...branding.trucks],
@@ -90,7 +85,7 @@ export default function useSettings() {
       const toSave = { ...data, _brandingSig: getBrandingSig() };
       const { error } = await supabase
         .from('settings')
-        .upsert({ id: 'default', data: toSave }, { onConflict: 'id' })
+        .upsert({ id: 'default', value: toSave }, { onConflict: 'id' })
         .select();
       
       if (error) throw error;

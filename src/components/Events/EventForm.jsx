@@ -235,13 +235,12 @@ export default function EventForm({
     setError(null);
     
     try {
-      console.log('Submitting event with data:', { ...form, id: event?.id, employees: JSON.stringify(form.employees) });
-      // Convert employees array to JSON string for database storage
       const eventData = {
         ...form,
         id: event?.id,
-        employees: form.employees.length > 0 ? JSON.stringify(form.employees) : JSON.stringify([]),
+        employees: form.employees,
       };
+      console.log('Submitting event with data:', eventData);
       await onSave(eventData);
       console.log('Event saved successfully');
     } catch (err) {

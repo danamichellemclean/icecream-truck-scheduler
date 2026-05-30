@@ -41,7 +41,7 @@ function toDbEvent(event) {
     contact_name: event.contactName || null,
     package: event.package || null,
     total_sales: event.totalSales != null ? parseFloat(event.totalSales) : null,
-    employees: JSON.stringify(employeesArray),
+    employees: employeesArray,
     notes: event.notes || null,
     // don't set created_at/updated_at unless provided
     ...(event.createdAt ? { created_at: event.createdAt } : {}),

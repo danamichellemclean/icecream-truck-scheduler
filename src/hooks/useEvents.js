@@ -28,7 +28,7 @@ function toDbEvent(data) {
     package: data.package || null,
     truck: data.truck || null,
     total_sales: data.totalSales != null ? parseFloat(data.totalSales) : null,
-    employees: JSON.stringify(employeesArray),
+    employees: employeesArray,
     notes: data.notes || null,
   };
   if (data.createdAt) out.created_at = data.createdAt;

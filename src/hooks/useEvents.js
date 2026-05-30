@@ -34,31 +34,46 @@ export default function useEvents() {
 
   const addEvent = useCallback(async (data) => {
     try {
+      console.log('useEvents.addEvent: Creating event:', data);
       const event = { ...data, id: generateId(), createdAt: new Date().toISOString() };
-      const { error } = await supabase
+      console.log('useEvents.addEvent: Event object to insert:', event);
+      const { data: result, error } = await supabase
         .from('events')
-        .insert([event]);
+        .insert([event])
+        .select();
       
-      if (error) throw error;
+      console.log('useEvents.addEvent: Supabase response - data:', result, 'error:', error);
+      if (error) {
+        console.error('useEvents.addEvent: Supabase error:', error);
+        throw new Error(error.message || 'Failed to insert event into database');
+      }
+      console.log('useEvents.addEvent: Successfully inserted event');
       setEvents((prev) => [...prev, event]);
       return event;
     } catch (error) {
-      console.error('Error adding event:', error);
+      console.error('useEvents.addEvent: Catch block error:', error);
       throw error;
     }
   }, []);
 
   const updateEvent = useCallback(async (data) => {
     try {
-      const { error } = await supabase
+      console.log('useEvents.updateEvent: Updating event:', data.id);
+      const { data: result, error } = await supabase
         .from('events')
         .update(data)
-        .eq('id', data.id);
+        .eq('id', data.id)
+        .select();
       
-      if (error) throw error;
+      console.log('useEvents.updateEvent: Supabase response - data:', result, 'error:', error);
+      if (error) {
+        console.error('useEvents.updateEvent: Supabase error:', error);
+        throw new Error(error.message || 'Failed to update event in database');
+      }
+      console.log('useEvents.updateEvent: Successfully updated event');
       setEvents((prev) => prev.map((e) => (e.id === data.id ? { ...e, ...data } : e)));
     } catch (error) {
-      console.error('Error updating event:', error);
+      console.error('useEvents.updateEvent: Catch block error:', error);
       throw error;
     }
   }, []);

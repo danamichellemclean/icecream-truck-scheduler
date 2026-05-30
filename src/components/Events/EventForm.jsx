@@ -170,18 +170,22 @@ export default function EventForm({
   const isNew = !event?.id;
   const [form, setForm] = useState(() => {
     const { setupTime, ...rest } = event || {};
+    // Parse employees from JSON string if needed
+    const employeesData = rest.employees ? (typeof rest.employees === 'string' ? JSON.parse(rest.employees) : rest.employees) : [];
     return {
       ...EMPTY,
       ...rest,
       endTime: rest.endTime ?? setupTime ?? '',
       eventDate: rest.eventDate || defaultDate || today(),
-      employees: rest.employees ?? [],
+      employees: employeesData,
       customerId: rest.customerId ?? null,
     };
   });
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAddName, setQuickAddName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
   const firstInputRef = useRef(null);
 
   useEffect(() => { firstInputRef.current?.focus(); }, []);
@@ -223,10 +227,28 @@ export default function EventForm({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.contactName.trim() || !form.eventDate) return;
-    onSave({ ...form, id: event?.id });
+    
+    setSaving(true);
+    setError(null);
+    
+    try {
+      console.log('Submitting event with data:', { ...form, id: event?.id, employees: JSON.stringify(form.employees) });
+      // Convert employees array to JSON string for database storage
+      const eventData = {
+        ...form,
+        id: event?.id,
+        employees: form.employees.length > 0 ? JSON.stringify(form.employees) : JSON.stringify([]),
+      };
+      await onSave(eventData);
+      console.log('Event saved successfully');
+    } catch (err) {
+      console.error('Error submitting event:', err);
+      setError(err?.message || 'Failed to save event. Please try again.');
+      setSaving(false);
+    }
   };
 
   const handleDelete = () => {
@@ -247,6 +269,18 @@ export default function EventForm({
         </div>
 
         <form className="modal-body" onSubmit={handleSubmit} noValidate>
+          {error && (
+            <div style={{ 
+              padding: '12px', 
+              marginBottom: '16px', 
+              backgroundColor: '#fee', 
+              color: '#c33', 
+              borderRadius: '4px',
+              border: '1px solid #fcc'
+            }}>
+              {error}
+            </div>
+          )}
 
           {/* ── Customer picker ──────────────────────────────────────────── */}
           <div className="form-group">
@@ -382,13 +416,13 @@ export default function EventForm({
               </button>
             )}
             <div className="modal-actions-right">
-              <button type="button" className="btn btn--ghost" onClick={onClose}>Cancel</button>
+              <button type="button" className="btn btn--ghost" onClick={onClose} disabled={saving}>Cancel</button>
               <button
                 type="submit"
                 className="btn btn--primary"
-                disabled={!form.contactName.trim() || !form.eventDate}
+                disabled={!form.contactName.trim() || !form.eventDate || saving}
               >
-                {isNew ? 'Add Event' : 'Save Changes'}
+                {saving ? 'Saving...' : isNew ? 'Add Event' : 'Save Changes'}
               </button>
             </div>
           </div>

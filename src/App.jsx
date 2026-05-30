@@ -58,11 +58,20 @@ export default function App() {
 
   const handleSave = async (data) => {
     try {
-      if (data.id) await updateEvent(data);
-      else await addEvent(data);
+      console.log('App.handleSave: Saving event with id:', data.id);
+      if (data.id) {
+        console.log('Updating existing event:', data.id);
+        await updateEvent(data);
+      } else {
+        console.log('Creating new event');
+        await addEvent(data);
+      }
+      console.log('Event saved successfully');
       closeForm();
     } catch (error) {
-      console.error('Error saving event:', error);
+      console.error('App.handleSave: Error saving event:', error);
+      console.error('Error details:', { message: error?.message, code: error?.code, status: error?.status });
+      throw error; // Re-throw so EventForm can catch and display it
     }
   };
 

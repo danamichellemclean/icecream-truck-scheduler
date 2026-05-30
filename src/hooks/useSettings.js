@@ -1,7 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
 import branding from '../config/branding';
-
-const KEY = 'ics_settings';
 
 function getBrandingSig() {
   return JSON.stringify({
@@ -15,72 +14,137 @@ function isValidShape(obj) {
   return obj && Array.isArray(obj.packages) && Array.isArray(obj.trucks) && Array.isArray(obj.employees);
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // If the saved data matches the current branding signature, keep it.
-      if (isValidShape(parsed) && parsed._brandingSig === getBrandingSig()) {
-        return {
-          packages: [...parsed.packages],
-          trucks: [...parsed.trucks],
-          employees: [...parsed.employees],
-        };
-      }
-      // Otherwise fall through and reset to branding defaults.
-    }
-  } catch { /* fall through */ }
-
-  // Seed from branding defaults and persist the new signature
-  const defaults = {
-    packages: [...branding.packages],
-    trucks: [...branding.trucks],
-    employees: [...branding.employees],
-  };
-  save(defaults);
-  return defaults;
-}
-
-function save(data) {
-  try {
-    const toSave = { ...data, _brandingSig: getBrandingSig() };
-    localStorage.setItem(KEY, JSON.stringify(toSave));
-  } catch { /* ignore */ }
-}
-
 export default function useSettings() {
-  const [settings, setSettings] = useState(load);
+  const [settings, setSettings] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const persist = useCallback((nextOrUpdater) => {
-    setSettings((prev) => {
-      const next = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
-      save(next);
-      return next;
-    });
+  // Load settings from Supabase on mount
+  useEffect(() => {
+    loadSettings();
   }, []);
 
-  const addItem = useCallback((section, value) => {
+  const loadSettings = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('settings')
+        .select('data')
+        .eq('id', 'default')
+        .single();
+      
+      let loadedSettings;
+      if (error && error.code === 'PGRST116') {
+        // No settings found, create defaults
+        loadedSettings = {
+          packages: [...branding.packages],
+          trucks: [...branding.trucks],
+          employees: [...branding.employees],
+        };
+        await saveSettingsToSupabase(loadedSettings);
+      } else if (error) {
+        throw error;
+      } else if (data && isValidShape(data.data)) {
+        // Check if branding signature matches
+        if (data.data._brandingSig === getBrandingSig()) {
+          loadedSettings = {
+            packages: [...data.data.packages],
+            trucks: [...data.data.trucks],
+            employees: [...data.data.employees],
+          };
+        } else {
+          // Reset to branding defaults
+          loadedSettings = {
+            packages: [...branding.packages],
+            trucks: [...branding.trucks],
+            employees: [...branding.employees],
+          };
+          await saveSettingsToSupabase(loadedSettings);
+        }
+      } else {
+        // Invalid data, reset to defaults
+        loadedSettings = {
+          packages: [...branding.packages],
+          trucks: [...branding.trucks],
+          employees: [...branding.employees],
+        };
+        await saveSettingsToSupabase(loadedSettings);
+      }
+      
+      setSettings(loadedSettings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      // Fall back to branding defaults
+      const defaults = {
+        packages: [...branding.packages],
+        trucks: [...branding.trucks],
+        employees: [...branding.employees],
+      };
+      setSettings(defaults);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const saveSettingsToSupabase = async (data) => {
+    try {
+      const toSave = { ...data, _brandingSig: getBrandingSig() };
+      const { error } = await supabase
+        .from('settings')
+        .upsert({ id: 'default', data: toSave }, { onConflict: 'id' })
+        .select();
+      
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving settings:', error);
+    }
+  };
+
+  const addItem = useCallback(async (section, value) => {
     const trimmed = value.trim();
-    if (!trimmed) return;
-    persist((prev) => {
-      if (prev[section].includes(trimmed)) return prev;
-      return { ...prev, [section]: [...prev[section], trimmed] };
-    });
-  }, [persist]);
+    if (!trimmed || !settings) return;
+    
+    try {
+      setSettings((prev) => {
+        if (prev[section].includes(trimmed)) return prev;
+        const updated = { ...prev, [section]: [...prev[section], trimmed] };
+        saveSettingsToSupabase(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error adding item:', error);
+    }
+  }, [settings]);
 
-  const removeItem = useCallback((section, value) => {
-    persist((prev) => ({ ...prev, [section]: prev[section].filter((v) => v !== value) }));
-  }, [persist]);
+  const removeItem = useCallback(async (section, value) => {
+    if (!settings) return;
+    
+    try {
+      setSettings((prev) => {
+        const updated = { ...prev, [section]: prev[section].filter((v) => v !== value) };
+        saveSettingsToSupabase(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error removing item:', error);
+    }
+  }, [settings]);
 
-  const reorderItem = useCallback((section, fromIndex, toIndex) => {
-    persist((prev) => {
-      const arr = [...prev[section]];
-      const [item] = arr.splice(fromIndex, 1);
-      arr.splice(toIndex, 0, item);
-      return { ...prev, [section]: arr };
-    });
-  }, [persist]);
+  const reorderItem = useCallback(async (section, fromIndex, toIndex) => {
+    if (!settings) return;
+    
+    try {
+      setSettings((prev) => {
+        const arr = [...prev[section]];
+        const [item] = arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, item);
+        const updated = { ...prev, [section]: arr };
+        saveSettingsToSupabase(updated);
+        return updated;
+      });
+    } catch (error) {
+      console.error('Error reordering item:', error);
+    }
+  }, [settings]);
 
-  return { settings, addItem, removeItem, reorderItem };
+  return { settings, loading, addItem, removeItem, reorderItem };
 }

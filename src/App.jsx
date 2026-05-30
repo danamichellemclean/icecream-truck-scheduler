@@ -11,15 +11,31 @@ import SalesSummary from './components/Sales/SalesSummary';
 import EventForm from './components/Events/EventForm';
 import SettingsView from './components/Settings/SettingsView';
 import CustomerList from './components/Customers/CustomerList';
+import { initializeSupabaseTables } from './utils/supabaseInit';
 import './App.css';
 
 export default function App() {
   const [view, setView] = useState('dashboard');
   const [formState, setFormState] = useState(null); // null=closed, { event, defaultDate }
+  const [isInitializing, setIsInitializing] = useState(true);
 
-  const { events, addEvent, updateEvent, deleteEvent } = useEvents();
-  const { settings, addItem, removeItem } = useSettings();
-  const { customers, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+  const { events, loading: eventsLoading, addEvent, updateEvent, deleteEvent } = useEvents();
+  const { settings, loading: settingsLoading, addItem, removeItem } = useSettings();
+  const { customers, loading: customersLoading, addCustomer, updateCustomer, deleteCustomer } = useCustomers();
+
+  // Initialize Supabase tables on mount
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initializeSupabaseTables();
+      } catch (error) {
+        console.error('Failed to initialize Supabase:', error);
+      } finally {
+        setIsInitializing(false);
+      }
+    };
+    init();
+  }, []);
 
   // Inject branding colors as CSS custom properties
   useEffect(() => {
@@ -34,14 +50,20 @@ export default function App() {
     document.title = branding.businessName;
   }, []);
 
+  const isLoading = isInitializing || eventsLoading || settingsLoading || customersLoading;
+
   const openAdd = (date = null) => setFormState({ event: {}, defaultDate: date });
   const openEdit = (event) => setFormState({ event, defaultDate: null });
   const closeForm = () => setFormState(null);
 
-  const handleSave = (data) => {
-    if (data.id) updateEvent(data);
-    else addEvent(data);
-    closeForm();
+  const handleSave = async (data) => {
+    try {
+      if (data.id) await updateEvent(data);
+      else await addEvent(data);
+      closeForm();
+    } catch (error) {
+      console.error('Error saving event:', error);
+    }
   };
 
   // When a customer detail row is clicked from within the CustomerList, open the event editor
@@ -49,6 +71,19 @@ export default function App() {
     openEdit(event);
     // stay on customers view — form overlays everything
   };
+
+  if (isLoading && !settings) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="app-main">
+          <div style={{ padding: '20px', textAlign: 'center' }}>
+            <p>Loading your data...</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="app">

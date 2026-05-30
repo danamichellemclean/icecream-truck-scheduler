@@ -1,46 +1,82 @@
-import { useState, useCallback } from 'react';
-
-const KEY = 'ics_customers';
+import { useState, useCallback, useEffect } from 'react';
+import { supabase } from '../utils/supabase';
 
 function generateId() {
   return `cust-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
 }
 
-function load() {
-  try {
-    const raw = localStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch { return []; }
-}
-
-function save(data) {
-  try { localStorage.setItem(KEY, JSON.stringify(data)); } catch { /* ignore */ }
-}
-
 export default function useCustomers() {
-  const [customers, setCustomers] = useState(load);
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const persist = useCallback((nextOrUpdater) => {
-    setCustomers((prev) => {
-      const next = typeof nextOrUpdater === 'function' ? nextOrUpdater(prev) : nextOrUpdater;
-      save(next);
-      return next;
-    });
+  // Load customers from Supabase on mount
+  useEffect(() => {
+    loadCustomers();
   }, []);
 
-  const addCustomer = useCallback((data) => {
-    const customer = { ...data, id: generateId(), createdAt: new Date().toISOString() };
-    persist((prev) => [...prev, customer]);
-    return customer;
-  }, [persist]);
+  const loadCustomers = useCallback(async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('customers')
+        .select('*')
+        .order('createdAt', { ascending: false });
+      
+      if (error) throw error;
+      setCustomers(data || []);
+    } catch (error) {
+      console.error('Error loading customers:', error);
+      setCustomers([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
-  const updateCustomer = useCallback((data) => {
-    persist((prev) => prev.map((c) => (c.id === data.id ? { ...c, ...data } : c)));
-  }, [persist]);
+  const addCustomer = useCallback(async (data) => {
+    try {
+      const customer = { ...data, id: generateId(), createdAt: new Date().toISOString() };
+      const { error } = await supabase
+        .from('customers')
+        .insert([customer]);
+      
+      if (error) throw error;
+      setCustomers((prev) => [customer, ...prev]);
+      return customer;
+    } catch (error) {
+      console.error('Error adding customer:', error);
+      throw error;
+    }
+  }, []);
 
-  const deleteCustomer = useCallback((id) => {
-    persist((prev) => prev.filter((c) => c.id !== id));
-  }, [persist]);
+  const updateCustomer = useCallback(async (data) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .update(data)
+        .eq('id', data.id);
+      
+      if (error) throw error;
+      setCustomers((prev) => prev.map((c) => (c.id === data.id ? { ...c, ...data } : c)));
+    } catch (error) {
+      console.error('Error updating customer:', error);
+      throw error;
+    }
+  }, []);
 
-  return { customers, addCustomer, updateCustomer, deleteCustomer };
+  const deleteCustomer = useCallback(async (id) => {
+    try {
+      const { error } = await supabase
+        .from('customers')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+      setCustomers((prev) => prev.filter((c) => c.id !== id));
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+      throw error;
+    }
+  }, []);
+
+  return { customers, loading, addCustomer, updateCustomer, deleteCustomer };
 }

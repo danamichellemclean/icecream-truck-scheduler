@@ -124,21 +124,29 @@ export default function CustomerList({ customers, events, onAddCustomer, onUpdat
       );
   }, [customers, search]);
 
-  const handleSave = (data) => {
-    if (data.id) {
-      onUpdateCustomer(data);
-      setSelected(data); // keep detail view open with fresh data
-    } else {
-      const created = onAddCustomer(data);
-      setSelected(created);
+  const handleSave = async (data) => {
+    try {
+      if (data.id) {
+        await onUpdateCustomer(data);
+        setSelected(data); // keep detail view open with fresh data
+      } else {
+        const created = await onAddCustomer(data);
+        setSelected(created);
+      }
+      setFormTarget(null);
+    } catch (error) {
+      console.error('Error saving customer:', error);
     }
-    setFormTarget(null);
   };
 
-  const handleDelete = (id) => {
-    onDeleteCustomer(id);
-    setSelected(null);
-    setFormTarget(null);
+  const handleDelete = async (id) => {
+    try {
+      await onDeleteCustomer(id);
+      setSelected(null);
+      setFormTarget(null);
+    } catch (error) {
+      console.error('Error deleting customer:', error);
+    }
   };
 
   // ── Detail view ────────────────────────────────────────────────────────────

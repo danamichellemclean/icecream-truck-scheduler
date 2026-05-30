@@ -213,10 +213,14 @@ export default function EventForm({
     }
   };
 
-  const handleQuickAdd = (data) => {
-    const newCustomer = onAddCustomer(data);
-    handleSelectCustomer(newCustomer);
-    setShowQuickAdd(false);
+  const handleQuickAdd = async (data) => {
+    try {
+      const newCustomer = await onAddCustomer(data);
+      handleSelectCustomer(newCustomer);
+      setShowQuickAdd(false);
+    } catch (error) {
+      console.error('Error adding customer:', error);
+    }
   };
 
   const handleSubmit = (e) => {

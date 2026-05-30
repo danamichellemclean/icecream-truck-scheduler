@@ -169,13 +169,13 @@ export default function EventForm({
 }) {
   const isNew = !event?.id;
   const [form, setForm] = useState(() => {
-    const { setupTime, ...rest } = event || {};
+    const { ...rest } = event || {};
     // Parse employees from JSON string if needed
     const employeesData = rest.employees ? (typeof rest.employees === 'string' ? JSON.parse(rest.employees) : rest.employees) : [];
     return {
       ...EMPTY,
       ...rest,
-      endTime: rest.endTime ?? setupTime ?? '',
+      endTime: rest.endTime ?? '',
       eventDate: rest.eventDate || defaultDate || today(),
       employees: employeesData,
       customerId: rest.customerId ?? null,

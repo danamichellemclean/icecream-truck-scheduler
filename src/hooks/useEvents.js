@@ -23,7 +23,6 @@ function toDbEvent(data) {
     event_date: data.eventDate || data.date || null,
     start_time: data.startTime || null,
     end_time: data.endTime || null,
-    setup_time: data.setupTime || null,
     contact_name: data.contactName || null,
     package: data.package || null,
     truck: data.truck || null,
@@ -42,7 +41,7 @@ function fromDbEvent(row) {
     date: row.event_date || '',
     startTime: row.start_time || '',
     endTime: row.end_time || '',
-    setupTime: row.setup_time || '',
+    // setupTime removed; use endTime only
     contactName: row.contact_name || '',
     package: row.package || '',
     truck: row.truck || '',

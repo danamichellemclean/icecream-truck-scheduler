@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS events (
   eventDate TEXT,
   startTime TEXT,
   endTime TEXT,
-  setupTime TEXT,
+  end_time TEXT,
   contactName TEXT,
   customerId TEXT,
   package TEXT,

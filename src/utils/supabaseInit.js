@@ -37,7 +37,6 @@ function toDbEvent(event) {
     event_date: event.eventDate || event.date || null,
     start_time: event.startTime || null,
     end_time: event.endTime || null,
-    setup_time: event.setupTime || null,
     contact_name: event.contactName || null,
     package: event.package || null,
     total_sales: event.totalSales != null ? parseFloat(event.totalSales) : null,

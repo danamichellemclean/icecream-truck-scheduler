@@ -144,7 +144,7 @@ supabase db push
 - `eventDate` (TEXT) - Event date
 - `startTime` (TEXT) - Start time
 - `endTime` (TEXT) - End time
-- `setupTime` (TEXT) - Setup time
+- `end_time` (TEXT) - End time
 - `contactName` (TEXT) - Contact person
 - `customerId` (TEXT) - Foreign key to customers
 - `package` (TEXT) - Package type

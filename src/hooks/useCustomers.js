@@ -1,10 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 
-function generateId() {
-  return `cust-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
-}
-
 function fromDbCustomer(row) {
   return {
     id: row.id,
@@ -18,15 +14,15 @@ function fromDbCustomer(row) {
 }
 
 function toDbCustomer(data) {
-  return {
-    id: data.id,
+  const out = {
     full_name: data.name || null,
     phone: data.phone || null,
     email: data.email || null,
     address: data.address || null,
     notes: data.notes || null,
-    created_at: data.createdAt || new Date().toISOString(),
   };
+  if (data.createdAt) out.created_at = data.createdAt;
+  return out;
 }
 
 export default function useCustomers() {
@@ -58,7 +54,7 @@ export default function useCustomers() {
 
   const addCustomer = useCallback(async (data) => {
     try {
-      const customer = { ...data, id: generateId(), createdAt: new Date().toISOString() };
+      const customer = { ...data };
       const dbCustomer = toDbCustomer(customer);
       const { data: result, error } = await supabase
         .from('customers')
@@ -70,7 +66,7 @@ export default function useCustomers() {
         throw error;
       }
 
-      const savedCustomer = fromDbCustomer(result?.[0] || dbCustomer);
+      const savedCustomer = fromDbCustomer(result?.[0] || {});
       setCustomers((prev) => [savedCustomer, ...prev]);
       return savedCustomer;
     } catch (error) {
@@ -81,8 +77,9 @@ export default function useCustomers() {
 
   const updateCustomer = useCallback(async (data) => {
     try {
+      const id = data.id;
       const dbCustomer = toDbCustomer(data);
-      const { id, ...payload } = dbCustomer;
+      const payload = { ...dbCustomer };
       delete payload.created_at;
       const { data: result, error } = await supabase
         .from('customers')

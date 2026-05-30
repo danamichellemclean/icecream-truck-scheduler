@@ -10,16 +10,16 @@ function loadFromLocalStorage(key) {
 }
 
 function toDbCustomer(customer) {
-  return {
-    id: customer.id,
+  const out = {
     full_name: customer.name || null,
     phone: customer.phone || null,
     email: customer.email || null,
     address: customer.address || null,
     notes: customer.notes || null,
-    created_at: customer.createdAt || new Date().toISOString(),
-    updated_at: customer.updatedAt || new Date().toISOString(),
   };
+  if (customer.createdAt) out.created_at = customer.createdAt;
+  if (customer.updatedAt) out.updated_at = customer.updatedAt;
+  return out;
 }
 
 function toDbEvent(event) {
@@ -33,7 +33,7 @@ function toDbEvent(event) {
       : [];
 
   return {
-    id: event.id,
+    // let Supabase generate `id`
     event_date: event.eventDate || event.date || null,
     start_time: event.startTime || null,
     end_time: event.endTime || null,
@@ -43,8 +43,9 @@ function toDbEvent(event) {
     total_sales: event.totalSales != null ? parseFloat(event.totalSales) : null,
     employees: JSON.stringify(employeesArray),
     notes: event.notes || null,
-    created_at: event.createdAt || new Date().toISOString(),
-    updated_at: event.updatedAt || new Date().toISOString(),
+    // don't set created_at/updated_at unless provided
+    ...(event.createdAt ? { created_at: event.createdAt } : {}),
+    ...(event.updatedAt ? { updated_at: event.updatedAt } : {}),
   };
 }
 
@@ -63,20 +64,28 @@ export async function initializeSupabaseTables() {
     if (events && events.length > 0) {
       console.log('Migrating events to Supabase...');
       for (const event of events) {
-        await supabase
-          .from('events')
-          .upsert(toDbEvent(event))
-          .select();
+        try {
+          await supabase
+            .from('events')
+            .insert([toDbEvent(event)])
+            .select();
+        } catch (err) {
+          console.error('Failed migrating event:', err, event);
+        }
       }
     }
 
     if (customers && customers.length > 0) {
       console.log('Migrating customers to Supabase...');
       for (const customer of customers) {
-        await supabase
-          .from('customers')
-          .upsert(toDbCustomer(customer))
-          .select();
+        try {
+          await supabase
+            .from('customers')
+            .insert([toDbCustomer(customer)])
+            .select();
+        } catch (err) {
+          console.error('Failed migrating customer:', err, customer);
+        }
       }
     }
 

@@ -1,10 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../utils/supabase';
 
-function generateId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-}
-
 function safeParse(value) {
   if (!value) return [];
   if (typeof value === 'string') {
@@ -23,8 +19,7 @@ function toDbEvent(data) {
       ? employeesValue
       : [];
 
-  return {
-    id: data.id,
+  const out = {
     event_date: data.eventDate || data.date || null,
     start_time: data.startTime || null,
     end_time: data.endTime || null,
@@ -35,8 +30,9 @@ function toDbEvent(data) {
     total_sales: data.totalSales != null ? parseFloat(data.totalSales) : null,
     employees: JSON.stringify(employeesArray),
     notes: data.notes || null,
-    created_at: data.createdAt || new Date().toISOString(),
   };
+  if (data.createdAt) out.created_at = data.createdAt;
+  return out;
 }
 
 function fromDbEvent(row) {
@@ -85,7 +81,7 @@ export default function useEvents() {
 
   const addEvent = useCallback(async (data) => {
     try {
-      const event = { ...data, id: generateId(), createdAt: new Date().toISOString() };
+      const event = { ...data };
       const dbEvent = toDbEvent(event);
       const { data: result, error } = await supabase
         .from('events')
@@ -97,7 +93,7 @@ export default function useEvents() {
         throw new Error(error.message || 'Failed to insert event into database');
       }
 
-      const savedEvent = fromDbEvent(result?.[0] || dbEvent);
+      const savedEvent = fromDbEvent(result?.[0] || {});
       setEvents((prev) => [...prev, savedEvent]);
       return savedEvent;
     } catch (error) {
@@ -108,8 +104,8 @@ export default function useEvents() {
 
   const updateEvent = useCallback(async (data) => {
     try {
-      const dbEvent = toDbEvent(data);
-      const { id, ...payload } = dbEvent;
+      const id = data.id;
+      const payload = toDbEvent(data);
       delete payload.created_at;
       const { data: result, error } = await supabase
         .from('events')

@@ -1,5 +1,6 @@
 /* ── Customer picker ─────────────────────────────────────────────────────── */
-.customer-picker {
+.customer-picker,
+.autocomplete-field {
   position: relative;
 }
 

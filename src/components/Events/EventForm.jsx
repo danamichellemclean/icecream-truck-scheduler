@@ -184,9 +184,11 @@ export default function EventForm({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [quickAddName, setQuickAddName] = useState('');
+  const [contactOpen, setContactOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(null);
   const firstInputRef = useRef(null);
+  const contactWrapperRef = useRef(null);
 
   useEffect(() => { firstInputRef.current?.focus(); }, []);
 
@@ -195,6 +197,16 @@ export default function EventForm({
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose, showQuickAdd]);
+
+  useEffect(() => {
+    const onClickOutside = (e) => {
+      if (contactWrapperRef.current && !contactWrapperRef.current.contains(e.target)) {
+        setContactOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', onClickOutside);
+    return () => document.removeEventListener('mousedown', onClickOutside);
+  }, []);
 
   const set = (field, value) => setForm((f) => ({ ...f, [field]: value }));
 
@@ -215,6 +227,46 @@ export default function EventForm({
         contactName: f.contactName || customer.name,
       }));
     }
+  };
+
+  const contactMatches = (form.contactName || '').trim()
+    ? (customers || [])
+      .filter((c) => {
+        const query = form.contactName.toLowerCase();
+        return (
+          c.name.toLowerCase().includes(query) ||
+          c.phone?.toLowerCase().includes(query) ||
+          c.email?.toLowerCase().includes(query)
+        );
+      })
+      .slice(0, 8)
+    : [];
+
+  const hasExactContactMatch = contactMatches.some((c) =>
+    c.name.toLowerCase() === form.contactName.trim().toLowerCase()
+  );
+
+  const handleContactNameChange = (value) => {
+    setForm((f) => ({
+      ...f,
+      contactName: value,
+      customerId:
+        f.customerId && customers?.find((c) => c.id === f.customerId)?.name === value
+          ? f.customerId
+          : null,
+    }));
+    setContactOpen(true);
+  };
+
+  const handleContactSelect = (customer) => {
+    setForm((f) => ({ ...f, contactName: customer.name, customerId: customer.id }));
+    setContactOpen(false);
+  };
+
+  const handleAddContactCustomer = () => {
+    setQuickAddName(form.contactName.trim());
+    setShowQuickAdd(true);
+    setContactOpen(false);
   };
 
   const handleQuickAdd = async (data) => {
@@ -301,17 +353,69 @@ export default function EventForm({
           </div>
 
           {/* ── Contact Name ─────────────────────────────────────────────── */}
-          <div className="form-group">
+          <div className="form-group" ref={contactWrapperRef}>
             <label htmlFor="contactName">Contact Name <span className="required">*</span></label>
-            <input
-              ref={firstInputRef}
-              id="contactName"
-              type="text"
-              value={form.contactName}
-              onChange={(e) => set('contactName', e.target.value)}
-              placeholder="e.g. Jane Smith"
-              required
-            />
+            <div className="autocomplete-field">
+              <input
+                ref={firstInputRef}
+                id="contactName"
+                type="text"
+                value={form.contactName}
+                onChange={(e) => handleContactNameChange(e.target.value)}
+                onFocus={() => setContactOpen(true)}
+                placeholder="e.g. Jane Smith"
+                aria-expanded={contactOpen}
+                required
+              />
+
+              {contactOpen && form.contactName.trim() && (
+                <div className="customer-picker-dropdown" role="listbox">
+                  {contactMatches.length === 0 ? (
+                    <div className="picker-no-results">
+                      No matches for "{form.contactName.trim()}"
+                    </div>
+                  ) : (
+                    contactMatches.map((customer) => (
+                      <button
+                        key={customer.id}
+                        type="button"
+                        role="option"
+                        className="picker-option"
+                        onMouseDown={(e) => {
+                          e.preventDefault();
+                          handleContactSelect(customer);
+                        }}
+                      >
+                        <span className="picker-option-avatar" aria-hidden="true">
+                          {customer.name.charAt(0).toUpperCase()}
+                        </span>
+                        <span className="picker-option-info">
+                          <span className="picker-option-name">{customer.name}</span>
+                          {(customer.phone || customer.email) && (
+                            <span className="picker-option-meta">
+                              {customer.phone || customer.email}
+                            </span>
+                          )}
+                        </span>
+                      </button>
+                    ))
+                  )}
+
+                  {!hasExactContactMatch && (
+                    <button
+                      type="button"
+                      className="picker-add-new"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        handleAddContactCustomer();
+                      }}
+                    >
+                      Add "{form.contactName.trim()}" as a new customer?
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* ── Date + Times ─────────────────────────────────────────────── */}

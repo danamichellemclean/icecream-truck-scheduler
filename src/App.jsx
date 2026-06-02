@@ -9,6 +9,7 @@ import CalendarView from './components/Calendar/CalendarView';
 import Dashboard from './components/Dashboard/Dashboard';
 import SalesSummary from './components/Sales/SalesSummary';
 import EventForm from './components/Events/EventForm';
+import EventDetails from './components/Events/EventDetails';
 import SettingsView from './components/Settings/SettingsView';
 import CustomerList from './components/Customers/CustomerList';
 import { initializeSupabaseTables } from './utils/supabaseInit';
@@ -16,7 +17,9 @@ import './App.css';
 
 export default function App() {
   const [view, setView] = useState('dashboard');
-  const [formState, setFormState] = useState(null); // null=closed, { event, defaultDate }
+  const [formState, setFormState] = useState(null); // null=closed, { event, defaultDate, mode }
+  const [passwordUnlocked, setPasswordUnlocked] = useState(false);
+  const requiredPassword = import.meta.env.VITE_APP_PASSWORD || 'sunshine';
   const [isInitializing, setIsInitializing] = useState(true);
 
   const { events, loading: eventsLoading, addEvent, updateEvent, deleteEvent } = useEvents();
@@ -52,8 +55,9 @@ export default function App() {
 
   const isLoading = isInitializing || eventsLoading || settingsLoading || customersLoading;
 
-  const openAdd = (date = null) => setFormState({ event: {}, defaultDate: date });
-  const openEdit = (event) => setFormState({ event, defaultDate: null });
+  const openAdd = (date = null) => setFormState({ event: {}, defaultDate: date, mode: 'add' });
+  const openDetails = (event) => setFormState({ event, defaultDate: null, mode: 'details' });
+  const openEdit = (event) => setFormState({ event, defaultDate: null, mode: 'edit' });
   const closeForm = () => setFormState(null);
 
   const handleSave = async (data) => {
@@ -77,9 +81,23 @@ export default function App() {
 
   // When a customer detail row is clicked from within the CustomerList, open the event editor
   const handleEventClickFromCustomer = (event) => {
-    openEdit(event);
-    // stay on customers view — form overlays everything
+    openDetails(event);
+    // stay on customers view — modal overlays everything
   };
+
+  if (!passwordUnlocked) {
+    return (
+      <div className="app">
+        <Header />
+        <main className="app-main">
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <h2>Please enter password to continue</h2>
+            <PasswordPrompt onUnlock={() => setPasswordUnlocked(true)} requiredPassword={requiredPassword} />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (isLoading && !settings) {
     return (
@@ -101,10 +119,10 @@ export default function App() {
       <BottomNav current={view} onChange={setView} />
       <main className="app-main">
         {view === 'dashboard' && (
-          <Dashboard events={events} onEdit={openEdit} onAdd={() => openAdd()} />
+          <Dashboard events={events} onEdit={openDetails} onAdd={() => openAdd()} />
         )}
         {view === 'calendar' && (
-          <CalendarView events={events} onEdit={openEdit} onDayClick={openAdd} />
+          <CalendarView events={events} onEdit={openDetails} onDayClick={openAdd} />
         )}
         {view === 'customers' && (
           <CustomerList
@@ -128,7 +146,16 @@ export default function App() {
         )}
       </main>
 
-      {formState && (
+      {formState && formState.mode === 'details' && (
+        <EventDetails
+          event={formState.event}
+          onClose={closeForm}
+          onEdit={() => openEdit(formState.event)}
+          customers={customers}
+        />
+      )}
+
+      {formState && formState.mode !== 'details' && (
         <EventForm
           event={formState.event}
           defaultDate={formState.defaultDate}
@@ -141,5 +168,35 @@ export default function App() {
         />
       )}
     </div>
+  );
+}
+
+
+function PasswordPrompt({ onUnlock, requiredPassword }) {
+  const [val, setVal] = useState('');
+  const [err, setErr] = useState(null);
+  const submit = (e) => {
+    e.preventDefault();
+    if (val === requiredPassword) {
+      onUnlock();
+    } else {
+      setErr('Incorrect password');
+    }
+  };
+  return (
+    <form onSubmit={submit} style={{ maxWidth: 360, margin: '0 auto' }}>
+      <input
+        autoFocus
+        type="password"
+        placeholder="Enter password"
+        value={val}
+        onChange={(e) => setVal(e.target.value)}
+        style={{ width: '100%', padding: '8px', fontSize: 16 }}
+      />
+      <div style={{ marginTop: 12 }}>
+        <button className="btn btn--primary" type="submit">Unlock</button>
+      </div>
+      {err && <div style={{ color: 'var(--color-danger)', marginTop: 8 }}>{err}</div>}
+    </form>
   );
 }

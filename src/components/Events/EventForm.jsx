@@ -162,6 +162,62 @@ function QuickAddCustomer({ initialName, onSave, onCancel }) {
   );
 }
 
+// ── TimePicker ─────────────────────────────────────────────────────────────
+// Three native <select> elements (hour / minute / AM-PM) so time entry is
+// consistent across all browsers and devices without relying on the native
+// time input, which renders differently (or not at all) on iPad/Safari/Chrome.
+// value / onChange use 24-hour "HH:MM" strings (or "" for blank).
+function TimePicker({ id, value, onChange }) {
+  const parse24 = (v) => {
+    if (!v) return { hour: '', minute: '00', period: 'AM' };
+    const [h, m] = v.split(':').map(Number);
+    return {
+      hour: String(h % 12 || 12),
+      minute: String(m).padStart(2, '0'),
+      period: h < 12 ? 'AM' : 'PM',
+    };
+  };
+
+  const [parts, setParts] = useState(() => parse24(value));
+
+  useEffect(() => { setParts(parse24(value)); }, [value]);
+
+  const emit = (h, m, p) => {
+    if (!h) { onChange(''); return; }
+    let h24 = parseInt(h, 10);
+    if (p === 'AM') { if (h24 === 12) h24 = 0; }
+    else             { if (h24 !== 12) h24 += 12; }
+    onChange(`${String(h24).padStart(2, '0')}:${m}`);
+  };
+
+  const update = (field, val) => {
+    const next = { ...parts, [field]: val };
+    setParts(next);
+    emit(next.hour, next.minute, next.period);
+  };
+
+  const minutes = ['00','05','10','15','20','25','30','35','40','45','50','55'];
+
+  return (
+    <div className="time-picker">
+      <select id={id} value={parts.hour} onChange={(e) => update('hour', e.target.value)} aria-label="Hour">
+        <option value="">--</option>
+        {[1,2,3,4,5,6,7,8,9,10,11,12].map((h) => (
+          <option key={h} value={String(h)}>{h}</option>
+        ))}
+      </select>
+      <span className="time-picker-sep" aria-hidden="true">:</span>
+      <select value={parts.minute} onChange={(e) => update('minute', e.target.value)} aria-label="Minute">
+        {minutes.map((m) => <option key={m} value={m}>{m}</option>)}
+      </select>
+      <select value={parts.period} onChange={(e) => update('period', e.target.value)} aria-label="AM or PM">
+        <option value="AM">AM</option>
+        <option value="PM">PM</option>
+      </select>
+    </div>
+  );
+}
+
 // ── Main EventForm ─────────────────────────────────────────────────────────
 export default function EventForm({
   event, defaultDate, onSave, onDelete, onClose,
@@ -432,13 +488,11 @@ export default function EventForm({
             </div>
             <div className="form-group">
               <label htmlFor="startTime">Start Time</label>
-              <input id="startTime" type="time" value={form.startTime}
-                onChange={(e) => set('startTime', e.target.value)} />
+              <TimePicker id="startTime" value={form.startTime} onChange={(v) => set('startTime', v)} />
             </div>
             <div className="form-group">
               <label htmlFor="endTime">End Time</label>
-              <input id="endTime" type="time" value={form.endTime}
-                onChange={(e) => set('endTime', e.target.value)} />
+              <TimePicker id="endTime" value={form.endTime} onChange={(v) => set('endTime', v)} />
             </div>
           </div>
 

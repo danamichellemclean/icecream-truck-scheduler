@@ -1,3 +1,35 @@
+/* ── TimePicker ───────────────────────────────────────────────────────────── */
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-picker select {
+  background: var(--color-background);
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--color-text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.time-picker select:focus {
+  border-color: var(--color-secondary);
+  box-shadow: 0 0 0 3px var(--color-secondary-light);
+}
+
+.time-picker-sep {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: 0 2px;
+  user-select: none;
+}
+
 /* ── Customer picker ─────────────────────────────────────────────────────── */
 .customer-picker,
 .autocomplete-field {

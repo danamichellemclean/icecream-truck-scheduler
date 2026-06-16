@@ -1,6 +1,14 @@
 import React from 'react';
 import './EventForm.css';
 
+function formatTime(t) {
+  if (!t) return null;
+  const [h, m] = t.split(':').map(Number);
+  const period = h < 12 ? 'AM' : 'PM';
+  const hour = h % 12 || 12;
+  return `${hour}:${String(m).padStart(2, '0')} ${period}`;
+}
+
 export default function EventDetails({ event = {}, onClose, onEdit, customers = [] }) {
   if (!event) return null;
 
@@ -27,7 +35,7 @@ export default function EventDetails({ event = {}, onClose, onEdit, customers = 
             </div>
             <div className="form-group">
               <label>Time</label>
-              <div>{event.startTime ? `${event.startTime}${event.endTime ? ' – ' + event.endTime : ''}` : '—'}</div>
+              <div>{event.startTime ? `${formatTime(event.startTime)}${event.endTime ? ' – ' + formatTime(event.endTime) : ''}` : '—'}</div>
             </div>
           </div>
 

@@ -11,6 +11,17 @@ export default function CalendarView({ events, onEdit, onDayClick }) {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth());
+  const [expandedDays, setExpandedDays] = useState(new Set());
+
+  const toggleExpand = (dateStr, e) => {
+    e.stopPropagation();
+    setExpandedDays((prev) => {
+      const next = new Set(prev);
+      if (next.has(dateStr)) next.delete(dateStr);
+      else next.add(dateStr);
+      return next;
+    });
+  };
 
   const prevMonth = () => {
     if (month === 0) { setYear((y) => y - 1); setMonth(11); }
@@ -65,7 +76,16 @@ export default function CalendarView({ events, onEdit, onDayClick }) {
           if (!day) return <div key={`empty-${idx}`} className="cal-cell cal-cell--empty" />;
 
           const dateStr = toDateString(new Date(year, month, day));
-          const dayEvents = byDate[dateStr] || [];
+          const rawEvents = byDate[dateStr] || [];
+          const dayEvents = [...rawEvents].sort((a, b) => {
+            if (!a.startTime && !b.startTime) return 0;
+            if (!a.startTime) return 1;
+            if (!b.startTime) return -1;
+            return a.startTime.localeCompare(b.startTime);
+          });
+          const isExpanded = expandedDays.has(dateStr);
+          const visibleEvents = isExpanded ? dayEvents : dayEvents.slice(0, 3);
+          const hiddenCount = dayEvents.length - 3;
           const isTodays = isToday(dateStr);
 
           return (
@@ -77,7 +97,7 @@ export default function CalendarView({ events, onEdit, onDayClick }) {
             >
               <span className="cal-day-num">{day}</span>
               <div className="cal-events">
-                {dayEvents.slice(0, 3).map((ev) => {
+                {visibleEvents.map((ev) => {
                   const timeText = ev.startTime && ev.endTime
                     ? `${formatTime(ev.startTime)} - ${formatTime(ev.endTime)}`
                     : ev.startTime
@@ -97,8 +117,23 @@ export default function CalendarView({ events, onEdit, onDayClick }) {
                     </button>
                   );
                 })}
-                {dayEvents.length > 3 && (
-                  <span className="cal-more">+{dayEvents.length - 3} more</span>
+                {!isExpanded && hiddenCount > 0 && (
+                  <button
+                    className="cal-more"
+                    onClick={(e) => toggleExpand(dateStr, e)}
+                    aria-label={`Show ${hiddenCount} more event(s)`}
+                  >
+                    +{hiddenCount} more
+                  </button>
+                )}
+                {isExpanded && dayEvents.length > 3 && (
+                  <button
+                    className="cal-more cal-more--collapse"
+                    onClick={(e) => toggleExpand(dateStr, e)}
+                    aria-label="Show fewer events"
+                  >
+                    show less
+                  </button>
                 )}
               </div>
             </button>

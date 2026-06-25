@@ -168,7 +168,20 @@
 .cal-more {
   font-size: 0.62rem;
   color: var(--color-text-secondary);
-  padding-left: 5px;
+  padding: 1px 5px;
+  background: none;
+  border: none;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  border-radius: 3px;
+  transition: background 0.1s, color 0.1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.cal-more:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text);
 }
 
 /* ── Mobile: tighter cells ───────────────────────────────────────────────── */

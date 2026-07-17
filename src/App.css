@@ -3,6 +3,7 @@
   flex-direction: column;
   min-height: 100dvh;
   background: var(--color-background);
+  overflow-x: hidden;
 }
 
 /* Fixed background image overlay — rendered below all app chrome */

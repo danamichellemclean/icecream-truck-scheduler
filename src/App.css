@@ -1,7 +1,7 @@
 .app {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  height: 100dvh;
   background: var(--color-background);
   overflow-x: hidden;
 }
@@ -21,11 +21,13 @@
 
 .app-main {
   flex: 1;
+  min-height: 0; /* allows flex child to shrink so overflow-y scroll works */
   position: relative;
   z-index: 1;
   /* Mobile: leave room for the fixed bottom nav (5 tabs ≈ 54px + safe area) */
   padding-bottom: calc(60px + env(safe-area-inset-bottom));
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 @media (min-width: 700px) {
